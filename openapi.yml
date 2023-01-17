@@ -66,12 +66,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -97,7 +91,19 @@ paths:
       operationId: ClassroomsService.get
       tags:
         - Classrooms
-      parameters: []
+      parameters:
+        - name: code
+          in: query
+          description: The classroom’s `code`
+          required: true
+          schema:
+            type: string
+        - name: retMemberLimit
+          in: query
+          description: limit the return number of members for the classroom
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: ''
@@ -146,12 +152,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -185,12 +185,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
@@ -469,12 +463,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -491,12 +479,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
@@ -537,12 +519,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -562,12 +538,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
@@ -600,12 +570,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
@@ -657,12 +621,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -701,12 +659,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -740,12 +692,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: handle
-          in: query
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -771,12 +717,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
@@ -810,12 +750,6 @@ paths:
       parameters:
         - name: handle
           in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-        - name: handle
-          in: query
           description: The document's `_id` or `slug`.
           required: true
           schema:
