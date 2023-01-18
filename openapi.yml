@@ -20,7 +20,7 @@ paths:
           in: query
           description: >-
             Will be passed through your lookup URL to get the user ID. Required
-            if no code.
+            if no `code`.
           required: false
           schema:
             type: string
@@ -28,7 +28,7 @@ paths:
           in: query
           description: >-
             Will be passed to the OAuth token endpoint to get a token. Required
-            if no accessToken.
+            if no `accessToken`.
           required: false
           schema:
             type: string
@@ -42,9 +42,9 @@ paths:
             type: string
         - name: errorRedirect
           in: query
-          description: >
+          description: >-
             If an error happens, redirects the user to this url, with at least
-            query parameters code, errorName and message.
+            query parameters `code`, `errorName` and `message`.
           required: false
           schema:
             type: string
@@ -94,16 +94,17 @@ paths:
       parameters:
         - name: code
           in: query
-          description: The classroom’s `code`
+          description: The classroom's `code`.
           required: true
           schema:
             type: string
         - name: retMemberLimit
           in: query
           description: limit the return number of members for the classroom
-          required: true
+          required: false
           schema:
-            type: integer
+            type: number
+            format: double
       responses:
         '200':
           description: ''
@@ -233,18 +234,15 @@ paths:
           required: true
           schema:
             type: string
-        - name: classroomHandle
+        - name: retMemberLimit
           in: query
-          description: The classroom's `_id`.
-          required: true
+          description: >-
+            limit the return number of members for the classroom, the default
+            value is 1000
+          required: false
           schema:
-            type: string
-        - name: courseHandle
-          in: query
-          description: The course's `_id`.
-          required: true
-          schema:
-            type: string
+            type: number
+            format: double
       responses:
         '200':
           description: ''
@@ -284,18 +282,15 @@ paths:
           required: true
           schema:
             type: string
-        - name: classroomHandle
+        - name: retMemberLimit
           in: query
-          description: The classroom's `_id`.
-          required: true
+          description: >-
+            limit the return number of members for the classroom, the default
+            value is 1000
+          required: false
           schema:
-            type: string
-        - name: courseHandle
-          in: query
-          description: The course's `_id`.
-          required: true
-          schema:
-            type: string
+            type: number
+            format: double
       responses:
         '200':
           description: ''
@@ -329,12 +324,32 @@ paths:
           required: true
           schema:
             type: string
-        - name: classroomHandle
+        - name: project
           in: query
-          description: The classroom's `_id`.
-          required: true
+          description: >
+            If specified, include only the specified projection of returned
+            stats; else, return all stats. Format as a comma-separated list,
+            like `creator,playtime,state.complete`.
+          required: false
           schema:
             type: string
+        - name: memberLimit
+          in: query
+          description: >-
+            Limit the return member number. the default value is 10, and the max
+            value is 100
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: memberSkip
+          in: query
+          description: |
+            Skip the members that doesn't need to return, for pagination
+          required: false
+          schema:
+            type: number
+            format: double
       responses:
         '200':
           description: ''
@@ -365,18 +380,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: classroomHandle
-          in: query
-          description: The classroom's `_id`.
-          required: true
-          schema:
-            type: string
-        - name: memberHandle
-          in: query
-          description: The classroom member's `_id`.
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: ''
@@ -393,7 +396,25 @@ paths:
       operationId: StatsService.getPlaytimeStats
       tags:
         - Stats
-      parameters: []
+      parameters:
+        - name: startDate
+          in: query
+          description: Earliest an included user was created
+          required: false
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          description: Latest an included user was created
+          required: false
+          schema:
+            type: string
+        - name: country
+          in: query
+          description: Filter by country string
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -463,6 +484,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: includePlayTime
+          in: query
+          description: Set to non-empty string to include stats.playTime in response
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: ''
@@ -519,6 +546,13 @@ paths:
           required: true
           schema:
             type: string
+        - name: retMemberLimit
+          in: query
+          description: limit the return number of members for each classroom
+          required: false
+          schema:
+            type: number
+            format: double
       responses:
         '200':
           description: ''
@@ -783,18 +817,6 @@ paths:
             type: string
         - name: value
           in: path
-          description: The value to be looked up.
-          required: true
-          schema:
-            type: string
-        - name: property
-          in: query
-          description: The property to lookup by. May either be `"israel-id"` or `"name"`.
-          required: true
-          schema:
-            type: string
-        - name: value
-          in: query
           description: The value to be looked up.
           required: true
           schema:
