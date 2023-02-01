@@ -6,7 +6,7 @@ paths:
   /auth/login-o-auth:
     get:
       description: Logs a user in.
-      operationId: AuthService.get
+      operationId: authService.get
       tags:
         - Auth
       parameters:
@@ -56,7 +56,7 @@ paths:
   /clan/{handle}/members:
     put:
       description: Upserts a user into the clan.
-      operationId: ClansService.put
+      operationId: clansService.put
       tags:
         - Clans
       parameters:
@@ -88,7 +88,7 @@ paths:
   /classrooms:
     get:
       description: Returns the classroom details for a class code.
-      operationId: ClassroomsService.get
+      operationId: classroomsService.get
       tags:
         - Classrooms
       parameters:
@@ -115,7 +115,7 @@ paths:
       security: *ref_0
     post:
       description: Creates a new empty `Classroom`.
-      operationId: ClassroomsService.create
+      operationId: classroomsService.create
       tags:
         - Classrooms
       parameters: []
@@ -143,7 +143,7 @@ paths:
   /classrooms/{handle}/members:
     put:
       description: Upserts a user into the classroom.
-      operationId: ClassroomsService.upsert
+      operationId: classroomsService.upsert
       tags:
         - Classrooms
       parameters:
@@ -180,7 +180,7 @@ paths:
                 - userId
     delete:
       description: Remove a user from the classroom.
-      operationId: ClassroomsService.removeUser
+      operationId: classroomsService.removeUser
       tags:
         - Classrooms
       parameters:
@@ -218,7 +218,7 @@ paths:
         Enrolls a user in a course in a classroom.
         If the course is paid, user must have an active license.
         User must be a member of the classroom.
-      operationId: ClassroomsService.enrollUser
+      operationId: classroomsService.enrollUser
       tags:
         - Classrooms
       parameters:
@@ -266,7 +266,7 @@ paths:
     put:
       description: |
         Removes an enrolled user from a course in a classroom.
-      operationId: ClassroomsService.unenrollUser
+      operationId: classroomsService.unenrollUser
       tags:
         - Classrooms
       parameters:
@@ -314,7 +314,7 @@ paths:
     get:
       description: |
         Returns a list of all members stats for the classroom.
-      operationId: ClassroomsService.getStats
+      operationId: classroomsService.getStats
       tags:
         - Classrooms
       parameters:
@@ -364,7 +364,7 @@ paths:
     get:
       description: |
         Returns a list of all levels played by the user for the classroom.
-      operationId: ClassroomsService.getLevelsPlayedForUser
+      operationId: classroomsService.getLevelsPlayedForUser
       tags:
         - Classrooms
       parameters:
@@ -393,7 +393,7 @@ paths:
   /playtime-stats:
     get:
       description: Returns the playtime stats
-      operationId: StatsService.getPlaytimeStats
+      operationId: statsService.getPlaytimeStats
       tags:
         - Stats
       parameters:
@@ -426,7 +426,7 @@ paths:
   /license-stats:
     get:
       description: Returns the license stats
-      operationId: StatsService.getLicenseStats
+      operationId: statsService.getLicenseStats
       tags:
         - Stats
       parameters: []
@@ -441,7 +441,7 @@ paths:
   /users:
     post:
       description: Creates a `User`.
-      operationId: UsersService.create
+      operationId: usersService.create
       tags:
         - Users
       parameters: []
@@ -474,7 +474,7 @@ paths:
   /users/{handle}:
     get:
       description: Returns a `User`.
-      operationId: UsersService.get
+      operationId: usersService.get
       tags:
         - Users
       parameters:
@@ -500,7 +500,7 @@ paths:
       security: *ref_0
     put:
       description: Modify name of a `User`
-      operationId: UsersService.modifyUser
+      operationId: usersService.modifyUser
       tags:
         - Users
       parameters:
@@ -536,7 +536,7 @@ paths:
       description: >-
         Returns a list of `Classrooms` this user is in (if a student) or owns
         (if a teacher).
-      operationId: UsersService.getClassrooms
+      operationId: usersService.getClassrooms
       tags:
         - Users
       parameters:
@@ -566,7 +566,7 @@ paths:
   /users/{handle}/hero-config:
     put:
       description: Set the user's hero.
-      operationId: UsersService.setHero
+      operationId: usersService.setHero
       tags:
         - Users
       parameters:
@@ -598,7 +598,7 @@ paths:
       description: >-
         Set the user's aceConfig (the settings for the in-game Ace code editor),
         such as whether to enable autocomplete.
-      operationId: UsersService.setAceConfig
+      operationId: usersService.setAceConfig
       tags:
         - Users
       parameters:
@@ -645,7 +645,7 @@ paths:
 
         3. It will then save that user `id` to the user in our db as a new
         OAuthIdentity.
-      operationId: UsersService.addOauth2Identity
+      operationId: usersService.addOauth2Identity
       tags:
         - Users
       parameters:
@@ -683,7 +683,7 @@ paths:
       description: >
         Grants a user premium access to the "Home" version up to a certain time.
         ```
-      operationId: UsersService.grantPremiumAccess
+      operationId: usersService.grantPremiumAccess
       tags:
         - Users
       parameters:
@@ -716,7 +716,7 @@ paths:
         If the ends is less than or equal to the current time, it revokes the
         subscription and sets the end date to be the current time, else it just
         shortens the subscription.
-      operationId: UsersService.shortenSubscription
+      operationId: usersService.shortenSubscription
       tags:
         - Users
       parameters:
@@ -745,7 +745,7 @@ paths:
       description: |
         Grants a user access to the "Classroom" version up to a certain time.
         Sets their role to "student".
-      operationId: UsersService.grantClassroomAccess
+      operationId: usersService.grantClassroomAccess
       tags:
         - Users
       parameters:
@@ -778,7 +778,7 @@ paths:
         If the ends is less than or equal to the current time, it revokes the
         enrollment and sets the end date to be the current time, else it just
         shortens the enrollment.
-      operationId: UsersService.shortenLicense
+      operationId: usersService.shortenLicense
       tags:
         - Users
       parameters:
@@ -805,7 +805,7 @@ paths:
   /users/user-lookup/{property}/{value}:
     get:
       description: Redirects to `/{handle}` given a unique, identifying property
-      operationId: UsersService.lookup
+      operationId: usersService.lookup
       tags:
         - Users
       parameters:
