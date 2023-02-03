@@ -5,7 +5,17 @@ info:
 paths:
   /auth/login-o-auth:
     get:
-      description: Logs a user in.
+      description: >
+        Logs a [user](#users) in. #### Example ```javascript url =
+        `https://codecombat.com/auth/login-o-auth?provider=${OAUTH_PROVIDER_ID}&accessToken=1234`
+        res.redirect(url) // User is sent to this CodeCombat URL and assuming
+        everything checks out,  // is logged in and redirected to the home page.
+        ``` In this example, we call your lookup URL (let's say,
+        `https://oauth.provider/user?t=<%= accessToken %>`) with the access
+        token (`1234`). The lookup URL returns `{ id: 'abcd' }` in this case. We
+        will match this `id` with the OAuthIdentity stored in the user
+        information in our db. If everything checks out, the user is logged in
+        and redirected to the home page.
       operationId: authService.get
       tags:
         - Auth
@@ -51,12 +61,13 @@ paths:
       responses:
         '204':
           description: ''
+      summary: Login User
       security: &ref_0
         - BasicAuth: []
   /clan/{handle}/members:
     put:
       description: Upserts a user into the clan.
-      operationId: clansService.put
+      operationId: clansService.upsertClan
       tags:
         - Clans
       parameters:
@@ -73,6 +84,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClanResponse'
+      summary: Upsert User Into Clan
       security: *ref_0
       requestBody:
         required: true
@@ -83,6 +95,7 @@ paths:
               properties:
                 userId:
                   type: string
+                  description: The `_id` or `slug` of the user to add to the clan.
               required:
                 - userId
   /classrooms:
@@ -112,6 +125,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClassroomResponseWithCode'
+      summary: Get Classroom Details
       security: *ref_0
     post:
       description: Creates a new empty `Classroom`.
@@ -122,6 +136,7 @@ paths:
       responses:
         '204':
           description: ''
+      summary: Create a Classroom
       security: *ref_0
       requestBody:
         required: true
@@ -132,8 +147,9 @@ paths:
               properties:
                 name:
                   type: string
+                  description: Name of the classroom
                 ownerID:
-                  $ref: '#/components/schemas/ObjectId'
+                  $ref: '#/components/schemas/objectIdString'
                 aceConfig:
                   $ref: '#/components/schemas/AceConfig'
               required:
@@ -143,7 +159,7 @@ paths:
   /classrooms/{handle}/members:
     put:
       description: Upserts a user into the classroom.
-      operationId: classroomsService.upsert
+      operationId: classroomsService.upsertFromClassroom
       tags:
         - Classrooms
       parameters:
@@ -160,6 +176,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClassroomResponse'
+      summary: Upsert a User from Classroom
       security: *ref_0
       requestBody:
         required: true
@@ -170,17 +187,22 @@ paths:
               properties:
                 code:
                   type: string
+                  description: The code for joining this classroom
                 userId:
                   type: string
+                  description: The `_id` or `slug` of the user to add to the class.
                 retMemberLimit:
                   type: number
                   format: double
+                  description: >-
+                    limit the return number of members for the classroom, the
+                    default value is 1000
               required:
                 - code
                 - userId
     delete:
       description: Remove a user from the classroom.
-      operationId: classroomsService.removeUser
+      operationId: classroomsService.deleteUserFromClassroom
       tags:
         - Classrooms
       parameters:
@@ -197,6 +219,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClassroomResponse'
+      summary: Delete User from Classroom
       security: *ref_0
       requestBody:
         required: true
@@ -207,9 +230,13 @@ paths:
               properties:
                 userId:
                   type: string
+                  description: The `_id` or `slug` of the user to remove from the class.
                 retMemberLimit:
                   type: number
                   format: double
+                  description: >-
+                    limit the return number of members for the classroom, the
+                    default value is 1000
               required:
                 - userId
   /classrooms/{classroomHandle}/courses/{courseHandle}/enrolled:
@@ -218,7 +245,7 @@ paths:
         Enrolls a user in a course in a classroom.
         If the course is paid, user must have an active license.
         User must be a member of the classroom.
-      operationId: classroomsService.enrollUser
+      operationId: classroomsService.enrollUserInCourse
       tags:
         - Classrooms
       parameters:
@@ -250,6 +277,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClassroomResponse'
+      summary: Enroll a User in a Course
       security: *ref_0
       requestBody:
         required: true
@@ -259,14 +287,14 @@ paths:
               type: object
               properties:
                 userId:
-                  $ref: '#/components/schemas/ObjectId'
+                  $ref: '#/components/schemas/objectIdString'
               required:
                 - userId
   /classrooms/{classroomHandle}/courses/{courseHandle}/remove-enrolled:
     put:
       description: |
         Removes an enrolled user from a course in a classroom.
-      operationId: classroomsService.unenrollUser
+      operationId: classroomsService.removeUserFromClassroom
       tags:
         - Classrooms
       parameters:
@@ -298,6 +326,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClassroomResponse'
+      summary: Remove a User from a Classroom
       security: *ref_0
       requestBody:
         required: true
@@ -307,14 +336,14 @@ paths:
               type: object
               properties:
                 userId:
-                  $ref: '#/components/schemas/ObjectId'
+                  $ref: '#/components/schemas/objectIdString'
               required:
                 - userId
   /classrooms/{classroomHandle}/stats:
     get:
       description: |
         Returns a list of all members stats for the classroom.
-      operationId: classroomsService.getStats
+      operationId: classroomsService.getMembersStats
       tags:
         - Classrooms
       parameters:
@@ -358,13 +387,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClassroomStats'
+                  $ref: '#/components/schemas/MemberStat'
+      summary: Get Members Stats for a Classroom
       security: *ref_0
   /classrooms/{classroomHandle}/members/{memberHandle}/sessions:
     get:
       description: |
         Returns a list of all levels played by the user for the classroom.
-      operationId: classroomsService.getLevelsPlayedForUser
+      operationId: classroomsService.getLevelSession
       tags:
         - Classrooms
       parameters:
@@ -389,6 +419,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LevelSessionResponse'
+      summary: Get Level Session
       security: *ref_0
   /playtime-stats:
     get:
@@ -422,6 +453,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlaytimeStatsResponse'
+      summary: Get Playtime Stats
       security: *ref_0
   /license-stats:
     get:
@@ -437,10 +469,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LicenseStatsResponse'
+      summary: Get License Stats
       security: *ref_0
   /users:
     post:
-      description: Creates a `User`.
+      description: |
+        Creates a `User`.
+        #### Example
+        ```javascript
+        url = 'https://codecombat.com/api/users'
+        json = { email: 'an@email.com', name: 'Some Username', role: 'student' }
+        request.post({ url, json, auth })
+        ```
       operationId: usersService.create
       tags:
         - Users
@@ -448,6 +488,7 @@ paths:
       responses:
         '204':
           description: ''
+      summary: Create User
       security: *ref_0
       requestBody:
         required: true
@@ -461,7 +502,10 @@ paths:
                 email:
                   type: string
                 role:
-                  type: string
+                  $ref: '#/components/schemas/UserRole'
+                  description: >-
+                    A `"student"` or `"teacher"`. If unset, a home user will be
+                    created, unable to join classrooms.
                 preferredLanguage:
                   type: string
                 heroConfig:
@@ -497,10 +541,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Get User
       security: *ref_0
     put:
       description: Modify name of a `User`
-      operationId: usersService.modifyUser
+      operationId: usersService.update
       tags:
         - Users
       parameters:
@@ -517,6 +562,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Update User
       security: *ref_0
       requestBody:
         required: true
@@ -527,8 +573,10 @@ paths:
               properties:
                 name:
                   type: string
+                  description: Set to new name string
                 birthday:
                   type: string
+                  description: Set the birthday
               required:
                 - name
   /users/{handle}/classrooms:
@@ -562,11 +610,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClassroomResponseWithCode'
+      summary: Get Classrooms By User
       security: *ref_0
   /users/{handle}/hero-config:
     put:
       description: Set the user's hero.
-      operationId: usersService.setHero
+      operationId: usersService.getHero
       tags:
         - Users
       parameters:
@@ -583,6 +632,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Get User Hero
       security: *ref_0
       requestBody:
         required: true
@@ -592,7 +642,7 @@ paths:
               type: object
               properties:
                 thangType:
-                  $ref: '#/components/schemas/ObjectId'
+                  $ref: '#/components/schemas/objectIdString'
   /users/{handle}/ace-config:
     put:
       description: >-
@@ -625,27 +675,93 @@ paths:
               properties:
                 liveCompletion:
                   type: boolean
+                  description: >-
+                    controls whether autocompletion snippets show up, the
+                    default value is true
                 behaviors:
                   type: boolean
+                  description: >-
+                    controls whether things like automatic parenthesis and quote
+                    completion happens, the default value is false
                 language:
                   type: string
+                  description: >-
+                    only for home users, should be one of ["python",
+                    "javascript", "cpp", "lua", "coffeescript"] right now
   /users/{handle}/o-auth-identities:
     post:
       description: >
         Adds an OAuth2 identity to the user, so that they can be logged in with
         that identity. You need to send the OAuth code or the access token to
-        this endpoint.
-
-        1. If no access token is provided, it will use your OAuth2 token URL to
-        exchange the given code for an access token.
-
-        2. Then it will use the access token (given by you, or received from
-        step 1) to look up the user on your service using the lookup URL, and
-        expects a JSON object in response with an `id` property.
-
-        3. It will then save that user `id` to the user in our db as a new
-        OAuthIdentity.
-      operationId: usersService.addOauth2Identity
+        this endpoint. 1. If no access token is provided, it will use your
+        OAuth2 token URL to exchange the given code for an access token. 1. Then
+        it will use the access token (given by you, or received from step 1) to
+        look up the user on your service using the lookup URL, and expects a
+        JSON object in response with an `id` property. 1. It will then save that
+        user `id` to the user in our db as a new OAuthIdentity. #### Example
+        ```javascript url =
+        `https://codecombat.com/api/users/${userID}/o-auth-identities`
+        OAUTH_PROVIDER_ID = 'xyz' json = { provider: OAUTH_PROVIDER_ID,
+        accessToken: '1234' } request.post({ url, json, auth}, (err, res) => {
+          console.log(res.body.oAuthIdentities) // [ { provider: 'xyx', id: 'abcd' } ]
+        }) ``` In this example, we call your lookup URL (let's say,
+        `https://oauth.provider/user?t=<%= accessToken %>`) with the access
+        token (`1234`). The lookup URL returns `{ id: 'abcd' }` in this case,
+        which we save to the user in our db.
+      operationId: usersService.addOAuthIdentity
+      tags:
+        - Users
+      parameters:
+        - name: handle
+          in: path
+          description: The document's `_id` or `slug`.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+      summary: Add OAuth2 Identity
+      security: *ref_0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  description: Your OAuth Provider ID.
+                accessToken:
+                  type: string
+                  description: >-
+                    Will be passed through your lookup URL to get the user ID.
+                    Required if no `code`.
+                code:
+                  type: string
+                  description: >-
+                    Will be passed to the OAuth token endpoint to get a token.
+                    Required if no `accessToken`.
+              required:
+                - provider
+  /users/{handle}/subscription:
+    put:
+      description: |
+        Grants a user premium access to the "Home" version up to a certain time.
+        #### Example
+        ```javascript
+        url = `https://codecombat.com/api/users/${userID}/subscription`
+        json = { ends: new Date('2017-01-01').toISOString() }
+        request.put({ url, json, auth }, (err, res) => {
+          console.log(res.body.subscription) // { ends: '2017-01-01T00:00:00.000Z', active: true }
+        })
+        ```
+      operationId: usersService.updateSubscription
       tags:
         - Users
       parameters:
@@ -670,52 +786,24 @@ paths:
             schema:
               type: object
               properties:
-                provider:
+                ends:
                   type: string
-                accessToken:
-                  type: string
-                code:
-                  type: string
+                  format: date-time
               required:
-                - provider
-  /users/{handle}/subscription:
-    put:
-      description: >
-        Grants a user premium access to the "Home" version up to a certain time.
-        ```
-      operationId: usersService.grantPremiumAccess
-      tags:
-        - Users
-      parameters:
-        - name: handle
-          in: path
-          description: The document's `_id` or `slug`.
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResponse'
-      security: *ref_0
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Subscription'
+                - ends
   /users/{handle}/shorten-subscription:
     put:
       description: >
         If the user already has a premium access up to a certain time, this
-        shortens/revokes his/her premium access.
-
-        If the ends is less than or equal to the current time, it revokes the
-        subscription and sets the end date to be the current time, else it just
-        shortens the subscription.
+        shortens/revokes his/her premium access. If the ends is less than or
+        equal to the current time, it revokes the subscription and sets the end
+        date to be the current time, else it just shortens the subscription.
+        #### Example ```javascript url =
+        `https://codecombat.com/api/users/${userID}/shorten-subscription` json =
+        { ends: new Date().toISOString() } request.put({ url, json, auth },
+        (err, res) => {
+          console.log(res.body.subscription.active) // false
+        }) ```
       operationId: usersService.shortenSubscription
       tags:
         - Users
@@ -733,19 +821,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Shorten User Subscription
       security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subscription'
+              type: object
+              properties:
+                ends:
+                  type: string
+                  format: date-time
+              required:
+                - ends
   /users/{handle}/license:
     put:
       description: |
         Grants a user access to the "Classroom" version up to a certain time.
         Sets their role to "student".
-      operationId: usersService.grantClassroomAccess
+        #### Example
+        ```javascript
+        url = `https://codecombat.com/api/users/${userID}/license`
+        json = { ends: new Date('2017-01-01').toISOString() }
+        request.put({ url, json, auth }, (err, res) => {
+          console.log(res.body.license) // { ends: '2017-01-01T00:00:00.000Z', active: true }
+        })
+        ```
+      operationId: usersService.grantLicense
       tags:
         - Users
       parameters:
@@ -762,22 +865,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Grant User License
       security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subscription'
+              type: object
+              properties:
+                ends:
+                  type: string
+                  format: date-time
+              required:
+                - ends
   /users/{handle}/shorten-license:
     put:
       description: >
         If the user already has access to the "Classroom" version up to a
-        certain time, this shortens/revokes his/her access.
-
-        If the ends is less than or equal to the current time, it revokes the
-        enrollment and sets the end date to be the current time, else it just
-        shortens the enrollment.
+        certain time, this shortens/revokes his/her access. If the ends is less
+        than or equal to the current time, it revokes the enrollment and sets
+        the end date to be the current time, else it just shortens the
+        enrollment. #### Example ```javascript url =
+        `https://codecombat.com/api/users/${userID}/shorten-license` json = {
+        ends: new Date().toISOString() } request.put({ url, json, auth }, (err,
+        res) => {
+          console.log(res.body.license.active) // false
+        }) ```
       operationId: usersService.shortenLicense
       tags:
         - Users
@@ -795,17 +909,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+      summary: Shorten User License
       security: *ref_0
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subscription'
-  /users/user-lookup/{property}/{value}:
+              type: object
+              properties:
+                ends:
+                  type: string
+                  format: date-time
+              required:
+                - ends
+  /user-lookup/{property}/{value}:
     get:
-      description: Redirects to `/{handle}` given a unique, identifying property
-      operationId: usersService.lookup
+      description: Redirects to `/users/{handle}` given a unique, identifying property
+      operationId: usersService.findUser
       tags:
         - Users
       parameters:
@@ -824,6 +945,7 @@ paths:
       responses:
         '204':
           description: ''
+      summary: Search for User
       security: *ref_0
 components:
   schemas:
@@ -832,7 +954,7 @@ components:
       description: Subset of properties listed here
       properties:
         _id:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
         name:
           type: string
         displayName:
@@ -840,83 +962,39 @@ components:
         members:
           type: array
           items:
-            $ref: '#/components/schemas/ObjectId'
+            $ref: '#/components/schemas/objectIdString'
         ownerID:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
         description:
           type: string
         type:
           type: string
         kind:
           type: string
-    ClassroomResponseWithCode:
-      type: object
-      description: Subset of properties listed here
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        name:
-          type: string
-        members:
-          type: array
-          items:
-            $ref: '#/components/schemas/ObjectId'
-        ownerID:
-          $ref: '#/components/schemas/ObjectId'
-        description:
-          type: string
-        code:
-          type: string
-        codeCamel:
-          type: string
-        courses:
-          type: array
-          items:
-            $ref: '#/components/schemas/Course'
-        clanId:
-          $ref: '#/components/schemas/ObjectId'
-    AceConfig:
-      type: object
-      properties:
-        language:
-          type: string
-    ClassroomStats:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        stats:
-          $ref: '#/components/schemas/ClassroomStatsInfo'
-    ClassroomStatsInfo:
-      type: object
-      properties:
-        gamesCompleted:
-          type: number
-          format: double
-        playtime:
-          type: number
-          format: double
+        metadata:
+          type: object
+          additionalProperties: {}
     LevelSessionResponse:
       type: object
       properties:
         state:
-          $ref: '#/components/schemas/LevelSessionState'
+          $ref: '#/components/schemas/State'
         level:
-          $ref: '#/components/schemas/LevelSessionLevelInfo'
+          $ref: '#/components/schemas/Level'
         levelID:
           type: string
           description: Level slug like `wakka-maul`
         creator:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
         playtime:
           type: integer
           description: Time played in seconds.
         changed:
-          $ref: '#/components/schemas/Datetime'
+          $ref: '#/components/schemas/datetimeString'
         created:
-          $ref: '#/components/schemas/Datetime'
+          $ref: '#/components/schemas/datetimeString'
         dateFirstCompleted:
-          $ref: '#/components/schemas/Datetime'
+          $ref: '#/components/schemas/datetimeString'
         submitted:
           type: boolean
           description: For arenas. Whether or not the level has been added to the ladder.
@@ -925,38 +1003,46 @@ components:
           description: >-
             For shareable projects. Whether or not the project has been shared
             with classmates.
-      required:
-        - state
-        - level
-        - levelID
-        - creator
-        - playtime
-        - changed
-        - created
-        - dateFirstCompleted
-        - submitted
-        - published
-    LevelSessionState:
+    State:
       type: object
       properties:
         complete:
           type: boolean
-      required:
-        - complete
-    LevelSessionLevelInfo:
+    Level:
       type: object
       properties:
         original:
           type: string
           description: The id for the level.
-      required:
-        - original
+    AceConfig:
+      type: object
+      properties:
+        language:
+          type: string
+          description: Programming language for the classroom
+    PlayStats:
+      type: object
+      properties:
+        gamesCompleted:
+          type: number
+          format: double
+        playtime:
+          type: number
+          format: double
+          description: Total play time in seconds
+    MemberStat:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/objectIdString'
+        stats:
+          $ref: '#/components/schemas/PlayStats'
     UserResponse:
       type: object
       description: Subset of properties listed here
       properties:
         _id:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
         email:
           type: string
         name:
@@ -970,7 +1056,7 @@ components:
         oAuthIdentities:
           type: array
           items:
-            $ref: '#/components/schemas/OauthIdentity'
+            $ref: '#/components/schemas/AuthIdentity'
         subscription:
           $ref: '#/components/schemas/Subscription'
         license:
@@ -981,10 +1067,16 @@ components:
         gamesCompleted:
           type: number
           format: double
+        concepts:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
         playTime:
           type: number
           format: double
-    OauthIdentity:
+          description: Included only when specifically requested on the endpoint
+    AuthIdentity:
       type: object
       properties:
         provider:
@@ -995,88 +1087,128 @@ components:
       type: object
       properties:
         ends:
-          $ref: '#/components/schemas/Datetime'
+          $ref: '#/components/schemas/datetimeString'
         active:
           type: boolean
     License:
       type: object
       properties:
         ends:
-          $ref: '#/components/schemas/Datetime'
+          $ref: '#/components/schemas/datetimeString'
         active:
           type: boolean
-    ObjectId:
+    objectIdString:
       type: string
-    Datetime:
-      type: string
-      description: |
-        Has regex "/^\\d{4}-\\d{2}-\\d{2}T\\d{2}\\:\\d{2}\\:\\d{2}\\.\\d{3}Z$/"
     roleString:
       type: string
       description: Usually either 'teacher' or 'student'
-    ClassroomResponse:
+    datetimeString:
+      type: string
+    ClassroomResponseWithCode:
       type: object
       description: Subset of properties listed here
       properties:
         _id:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
         name:
           type: string
         members:
           type: array
           items:
-            $ref: '#/components/schemas/ObjectId'
+            $ref: '#/components/schemas/objectIdString'
         ownerID:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
+        description:
+          type: string
+        code:
+          type: string
+        codeCamel:
+          type: string
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+        clanId:
+          $ref: '#/components/schemas/objectIdString'
+    Course:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/objectIdString'
+        levels:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        enrolled:
+          type: array
+          items:
+            $ref: '#/components/schemas/objectIdString'
+        instance_id:
+          $ref: '#/components/schemas/objectIdString'
+    ClassroomResponse:
+      type: object
+      description: Subset of properties listed here
+      properties:
+        _id:
+          $ref: '#/components/schemas/objectIdString'
+        name:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/objectIdString'
+        ownerID:
+          $ref: '#/components/schemas/objectIdString'
         description:
           type: string
         courses:
           type: array
           items:
             $ref: '#/components/schemas/Course'
-    Course:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        levels:
-          type: array
-          items: {}
-        enrolled:
-          type: array
-          items:
-            $ref: '#/components/schemas/ObjectId'
-        instance_id:
-          $ref: '#/components/schemas/ObjectId'
     PlaytimeStatsResponse:
       type: object
       properties:
         playTime:
           type: number
           format: double
+          description: Total play time in seconds
         gamesPlayed:
           type: number
           format: double
+          description: Number of levels played
     LicenseStatsResponse:
       type: object
       properties:
         licenseDaysGranted:
           type: number
           format: double
+          description: Total number of license days granted
         licenseDaysUsed:
           type: number
           format: double
+          description: Number of license days used
         licenseDaysRemaining:
           type: number
           format: double
+          description: Number of license days remaining
         activeLicenses:
           type: number
           format: double
+          description: Number of active/valid licenses
+    UserRole:
+      type: string
+      enum:
+        - student
+        - teacher
+      description: >-
+        A `"student"` or `"teacher"`. If unset, a home user will be created,
+        unable to join classrooms.
     HeroConfig:
       type: object
       properties:
         thangType:
-          $ref: '#/components/schemas/ObjectId'
+          $ref: '#/components/schemas/objectIdString'
   securitySchemes:
     BasicAuth:
       type: http
